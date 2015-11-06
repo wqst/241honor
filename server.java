@@ -3,74 +3,39 @@ import java.net.*;
 
 class ServerThread extends Thread {
 	private Socket socket;
-	private BufferedReader in;
+	private BufferedReader br1, br2;
 	private PrintWriter out;
 	private int connection;
+	private String str1 = "", str2 = "";
+	private Thread t1, t2;
 
 	public ServerThread(Socket s, int c) throws IOException {
+		t1 = new Thread(this);
+		t2 = new Thread(this);
 		socket = s;
 		connection = c;
-		in = new BufferedReader( new InputStreamReader( socket.getInputStream()));
-		out = new PrintWriter( new BufferedWriter( new OutputStreamWriter(
-						socket.getOutputStream())), true);
-		start(); 
-	}
-
-	String readFileForClient(String filename) {
-
-		String everything = null;
-		BufferedReader br = null;
-	    try {	
-	    	br = new BufferedReader(new FileReader(filename));
-	        StringBuilder sb = new StringBuilder();
-	        String line = br.readLine();
-
-	        while (line != null) {
-	            sb.append(line);
-	            sb.append(System.getProperty("line.separator"));
-	            line = br.readLine();
-	        }
-	        everything = sb.toString();
-	    } 
-	    catch (FileNotFoundException e) {
-	    	System.err.println("File not found.");
-	    }
-	    catch (IOException e){
-	    	System.err.println("File read error.");
-	    } finally {
-	    	try {
-	    		br.close();
-	    	}	
-	    	catch (IOException e){
-		    	System.err.println("Close error");
-	    	}
-	    }
-	    return everything;
+		System.out.println("Client " + connection + " connected");
+		t1.start();
+		t2.start(); 
 	}
 
 	public void run() {
 		try {
-
-			System.out.println("Client " + connection + " connected");
-
-			while (true) {
-				System.out.println("Sending message to client " + connection );
-				String msg = readFileForClient("test.txt");
-
-				out.println("LENGTH");
-				out.println(msg.length());
-
-				out.println("CONTENT");
-				out.println(msg);
-
-				out.println("END");
-				
-				while (true) {
-					String str = in.readLine();
-					System.out.println(str);
-				}
-				//out.println(str);
-				//if (str.equals("END")) break;
+			if (Thread.currentThread() == t1) {
+				do {
+					br1 = new BufferedReader(new InputStreamReader(System.in));
+					out = new PrintWriter(socket.getOutputStream(), true);
+					System.out.println("Enter String:");
+					str1 = br1.readLine();
+					out.println(str1);
+				} while (!str1.equals("END"));
+			}
+			else {
+				do {
+					br2 = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+					str2 = br2.readLine();
+					System.out.println("Received a message of length " + str2.length() + " from Client: " + str2);
+				} while (!str2.equals("END"));
 			}
 		}
 		catch(IOException e) {
