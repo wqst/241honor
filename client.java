@@ -28,7 +28,7 @@ class ClientThread extends Thread{
 				do {
 					br1 = new BufferedReader(new InputStreamReader(System.in));
 					out = new PrintWriter(socket.getOutputStream(), true);
-					System.out.println("Enter String:");
+					//System.out.println("Enter String:");
 					str1 = br1.readLine();
 					out.println(str1);
 				} while (!str1.equals("END"));
