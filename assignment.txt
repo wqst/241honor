@@ -1,3 +1,29 @@
 1. Several clients can connect to the server at the same time(Done)
-2. Still alive after server sends the data(Done) 
+2. Still alive after server sends the data(DoneS) 
 3. Communicate between server and client. Make response.(Doing now)
+
+next step:
+1. implement insert, update, add, show features.
+2. Broadcast the things to all.
+
+next next:
+1. Multiple nodes contact to each other.
+
+11/13:
+1. Have 4 servers and they can communicate with each other.(Done)
+2. Create a channel for servers communication and have delay in the channel. (Done)
+3. Four threads each servernode(server, client, queue thread and handle the message from the queue)
+
+next step:
+1. Build a key-value system, including insert, update, delete and show etc.
+2. Build the central server to boradcast and update all the things.
+3. First implement linearlizbility and sequential consistency.
+4. Make response to all the request
+
+11/20:
+1. Finish the key-value system
+2. Make response to the command
+
+next step:
+1. Build the central server and broadcast
+2. implement linearlizability and sequential consistency
