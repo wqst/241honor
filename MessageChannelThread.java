@@ -1,8 +1,6 @@
 import java.util.Queue;
-
-/**
+/*
  * Delay the message and then put it into a queue
- *
  */
 public class MessageChannelThread extends Thread {
 	private Queue<Packet> queue;
@@ -36,6 +34,7 @@ public class MessageChannelThread extends Thread {
 		synchronized (handler) {
 			handler.notify();
 		}
+
 	}
 
 	/**
@@ -48,5 +47,7 @@ public class MessageChannelThread extends Thread {
 			return 0.0;
 		else
 			return Math.random() * (double) p.getMaxDelay();
+
 	}
+
 }

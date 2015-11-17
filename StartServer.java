@@ -1,7 +1,9 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-
+/*
+ * Start server node
+ */
 public class StartServer {
 	public static final int centralServerID = 0;
 
@@ -16,6 +18,7 @@ public class StartServer {
 		int index = Integer.valueOf(args[0]);
 
 		ServerNode node = new ServerNode(index);
+
 		try {
 			// Read configuration file
 			BufferedReader r = new BufferedReader(new FileReader(file));
@@ -42,7 +45,6 @@ public class StartServer {
 				case "MaxDelay":
 					node.maxDelay = Integer.valueOf(s[1]);
 					break;
-
 				default:
 					System.out.println("Unrecognized configuration: " + s);
 				}
@@ -51,6 +53,8 @@ public class StartServer {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+
+
 		node.startThreads();
 	}
 

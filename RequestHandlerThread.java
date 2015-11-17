@@ -5,9 +5,8 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
-/**
+/*
  * Handle requests
- *
  */
 public abstract class RequestHandlerThread extends Thread {
 
@@ -29,10 +28,11 @@ public abstract class RequestHandlerThread extends Thread {
 		this.server = server;
 		this.index = server.index;
 	}
-		
+	
 	/**
 	 * 
 	 * @param p Packet to be handled
 	 */
 	abstract public void handleRequest(Packet p);
+
 }

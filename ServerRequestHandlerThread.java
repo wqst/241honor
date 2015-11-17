@@ -1,18 +1,17 @@
 import java.util.Queue;
-/**
+/*
  * Handle requests from server
- *
  */
 public class ServerRequestHandlerThread extends RequestHandlerThread {
 	/**
 	 * Constructor
-	 * @param server 
+	 * @param server
 	 * @param queue Queue of packets waiting to be handled
 	 */
 	public ServerRequestHandlerThread(ServerNode server, Queue<Packet> queue) {
 		super(server, queue);
 	}
-	
+
 	public void run() {
 		while (true) {
 			Packet p;
@@ -33,7 +32,12 @@ public class ServerRequestHandlerThread extends RequestHandlerThread {
 		}
 	}
 
+	/*
+	 * Perform key-value operation
+	 */
 	public void handleRequest(Packet p) {
 		System.out.println(index + ": Received from server: " + p.toString());
+		server.keyValueOperation(p);
 	}
+
 }

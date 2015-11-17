@@ -5,9 +5,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
-/**
+/*
  * Read commands from command line and send requests to servers
- *
  */
 public class ClientThread extends Thread {
 	private String[] ip;
@@ -29,29 +28,61 @@ public class ClientThread extends Thread {
 	public void run() {
 		BufferedReader commandReader = new BufferedReader(
 				new InputStreamReader(System.in));
+		String errorMessage = "Usage: [Operation(delete,get,insert,update)] [Key] [Value]\n>";
 		while (true) {
 			// Read message from command line
 			try {
 				String command = commandReader.readLine();
-				int dest = index;
 				String[] s = command.split(" ");
-				String message = "";
+				int key = 0, value = 0, model = 1, dest = index;
+				String op = "", message = "";
 				int len = s.length;
 				switch (s[0].toLowerCase()) {
 				case "send":
+					op = "send";
 					for (int i = 1; i < len-1; i++)
 						message += s[i] + " ";
 					dest = Integer.valueOf(s[len-1]);
 					break;
-				default:
+				case "delete":
+					key = Integer.valueOf(s[1]);
+					op = "delete";
 					break;
+				case "get":
+					key = Integer.valueOf(s[1]);
+					op = "get";
+					break;
+				case "insert":
+					key = Integer.valueOf(s[1]);
+					value = Integer.valueOf(s[2]);
+					op = "insert";
+					break;
+				case "update":
+					key = Integer.valueOf(s[1]);
+					value = Integer.valueOf(s[2]);
+					op = "update";
+					break;
+				case "show-all":
+					op = "show-all";
+					break;
+				case "search":
+					key = Integer.valueOf(s[1]);
+					op = "search";
+					break;
+				default:
+					System.out.println(errorMessage);
+					continue;
 				}
-				Packet p = new Packet(index, dest, maxDelay, message);
+				Packet p = new Packet(index, dest, maxDelay, op, key, value,
+						model, message);
 				sendPacket(p, dest);
+
 			} catch (IOException e) {
 				System.out.println("Cannot read from console.");
 				e.printStackTrace();
-			} 
+			} catch (NumberFormatException e) {
+				System.out.print(errorMessage);
+			}
 			System.out.print(">");
 		}
 	}
@@ -73,5 +104,4 @@ public class ClientThread extends Thread {
 			e.printStackTrace();
 		}
 	}
-	
 }

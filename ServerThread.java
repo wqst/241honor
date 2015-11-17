@@ -4,10 +4,8 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Queue;
-
-/**
+/*
  * Receive packets and put them into delay channels
- *
  */
 public class ServerThread extends Thread {
 	private int[] ports;
@@ -46,9 +44,9 @@ public class ServerThread extends Thread {
 				}
 				
 				// Put the received packet into the delay channel
-				MessageChannelThread channel = new MessageChannelThread(
-						serverMessageQueue, p, sh);
-				channel.start();
+					MessageChannelThread channel = new MessageChannelThread(
+							serverMessageQueue, p, sh);
+					channel.start();
 			}
 		} catch (IOException e) {
 			System.out.println("Cannot get message from port "
