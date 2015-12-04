@@ -5,32 +5,29 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Queue;
 /*
- * Receive packets and put them into delay channels
+ * Receive packets at central server and put them into delay channels
  */
-public class ServerThread extends Thread {
+public class CentralServerThread extends Thread {
 	private int[] ports;
 	private int index;
-	private Queue<Packet> clientMessageQueue, serverMessageQueue;
-	private Thread sh, ch;
+	private Queue<Packet> messageQueue;
+	private RequestHandlerThread centralHandler;
 
 	/**
-	 * Constructor
-	 * @param server
-	 * @param qc Queue for client packets
-	 * @param qs Queue for server packets
+	 * Constructor 
+	 * @param server 
+	 * @param queue Queue of packets at central server
 	 */
-	public ServerThread(ServerNode server, Queue<Packet> qc, Queue<Packet> qs) {
-		this.ports = server.serverPorts;
-		this.index = server.index;
-		this.clientMessageQueue = qc;
-		this.serverMessageQueue = qs;
-		this.sh = server.getServerHandler();
-		this.ch = server.getClientHandler();
+	public CentralServerThread(ServerNode server, Queue<Packet> queue) {
+		ports = server.serverPorts;
+		index = server.index;
+		messageQueue = queue;
+		centralHandler = server.getServerHandler();
 	}
 
 	public void run() {
 		try (ServerSocket welcomeSocket = new ServerSocket(ports[index])) {
-			System.out.println(this.index + ": Listening to message on port "
+			System.out.println("Central Server (" + this.index + "): Listening to message on port "
 					+ ports[index]);
 			while (true) {
 				// Accept communication request from client
@@ -41,24 +38,18 @@ public class ServerThread extends Thread {
 						connectionSocket.getOutputStream());
 				Packet p = (Packet) inFromClient.readObject();
 
-				// Check destination
-				if (p.getDest() != this.index) {
+				//Check destination
+				if (p.getDest() != this.index && p.getOperation() != "send") {
 					System.out.println("Received wrong message! Destination = "
 							+ p.getDest() + ",Current Index = " + index);
 					continue;
 				}
-
-				p.setReturnChannel(outToClient);
 				
-				//Put the received packet into the delay channel
-				if (p.fromClient()) {
-					MessageChannelThread channel = new MessageChannelThread(clientMessageQueue, p, ch);
-					channel.start();
-				 } else {
-					MessageChannelThread channel = new MessageChannelThread(
-							serverMessageQueue, p, sh);
-					channel.start();
-				}
+				// Put the received packet into the delay channel
+				p.setReturnChannel(outToClient);
+				MessageChannelThread channel = new MessageChannelThread(
+						messageQueue, p, centralHandler);
+				channel.start();
 			}
 		} catch (IOException e) {
 			System.out.println("Cannot get message from port "
@@ -68,6 +59,6 @@ public class ServerThread extends Thread {
 			System.out.println("Received unrecoginized packet.");
 			e.printStackTrace();
 		}
-	}
 
+	}
 }

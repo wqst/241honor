@@ -14,9 +14,11 @@ public class ServerNode {
 	public int maxDelay;
 	private ClientThread client;
 	private ServerThread server;
+	private ClientRequestHandlerThread ch;
 	private ServerRequestHandlerThread sh;
 	private HashMap<Integer, ValueTime> keyValueStore = new HashMap<Integer, ValueTime>();
 	private Queue<Packet> serverMessageQueue = new LinkedBlockingQueue<Packet>();
+	private Queue<Packet> clientMessageQueue = new LinkedBlockingQueue<Packet>();
 	public int delay; // delay in ms
 
 	/**
@@ -37,13 +39,23 @@ public class ServerNode {
 	}
 
 	/**
+	 * 
+	 * @return Client request handling thread of this server
+	 */
+	public RequestHandlerThread getClientHandler() {
+		return ch;
+	}
+
+	/**
 	 * Start client thread and server thread
 	 */
 	public void startThreads() {
+		ch = new ClientRequestHandlerThread(this, clientMessageQueue);
 		sh = new ServerRequestHandlerThread(this, serverMessageQueue);
+		ch.start();
 		sh.start();
 		client = new ClientThread(this);
-		server = new ServerThread(this, serverMessageQueue);
+		server = new ServerThread(this, clientMessageQueue, serverMessageQueue);
 		client.start();
 		server.start();
 		System.out.println("Server Started... Id: " + index + ", IP Address: "
@@ -109,6 +121,11 @@ public class ServerNode {
 			} else {
 				System.out.println(index + ": Key = " + p.getKey()
 						+ " already exists.");
+				if (vt.getTime().compareTo(vt_old.getTime()) > 0) {
+					keyValueStore.put(p.getKey(), vt);
+					System.out.println(index + ": Updated " + p.getKey() + ", "
+							+ vt.getValue());
+				}
 			}
 			break;
 		case "update":
@@ -117,7 +134,7 @@ public class ServerNode {
 				p.setValueTime(null);
 				System.out.println(index + ": " + p.getKey()
 						+ " is not in the store");
-			} else  {
+			} else if (vt.getTime().compareTo(vt_old.getTime()) > 0) {
 				keyValueStore.put(p.getKey(), vt);
 				System.out.println(index + ": Updated " + p.getKey() + ", "
 						+ vt.getValue());

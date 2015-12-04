@@ -32,12 +32,16 @@ public class ServerRequestHandlerThread extends RequestHandlerThread {
 		}
 	}
 
-	/*
-	 * Perform key-value operation
+	/**
+	 * Perform key-value operation and reply to source server
 	 */
 	public void handleRequest(Packet p) {
 		System.out.println(index + ": Received from server: " + p.toString());
 		server.keyValueOperation(p);
+		if (p.getOperation() != "send"){
+			Packet p1 = new Packet(index, p.getSource(), p, true);
+			replyToSender(p1, p.getReturnChannel());
+		}
 	}
 
 }

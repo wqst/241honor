@@ -18,6 +18,7 @@ public class StartServer {
 		int index = Integer.valueOf(args[0]);
 
 		ServerNode node = new ServerNode(index);
+		CentralServerNode cs;
 
 		try {
 			// Read configuration file
@@ -45,11 +46,21 @@ public class StartServer {
 				case "MaxDelay":
 					node.maxDelay = Integer.valueOf(s[1]);
 					break;
+
 				default:
 					System.out.println("Unrecognized configuration: " + s);
 				}
 			}
 			r.close();
+			// Start central server if index = 1
+			if (index == 1) {
+				cs = new CentralServerNode();
+				cs.totalNodes = node.totalNodes;
+				cs.serverPorts = node.serverPorts;
+				cs.ip = node.ip;
+				cs.maxDelay = node.maxDelay;
+				cs.startThreads();
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

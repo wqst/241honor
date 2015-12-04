@@ -15,8 +15,10 @@ public class Packet implements Serializable {
 	private int source, dest, maxDelay, key, model;
 	private ValueTime vt;
 	private String op, message;
-	private boolean fromClient;
+	private boolean isAck, fromClient;
 	private Date sentTime;
+	private ObjectOutputStream returnChannel;
+	private boolean[] hasKey;
 
 	/**
 	 * Generate new packet at client
@@ -37,6 +39,7 @@ public class Packet implements Serializable {
 		this.op = op;
 		this.key = key;
 		this.model = model;
+		this.isAck = false;
 		this.sentTime = new Date();
 		this.fromClient = true;
 		this.message = message;
@@ -46,13 +49,15 @@ public class Packet implements Serializable {
 			this.vt = null;
 	}
 
-	/*
+	/**
 	 * Generate new packet at server
 	 * 
 	 * @param source Source index
 	 * @param dest Destination index
 	 * @param p Old packet 
-	public Packet(int source, int dest, Packet p) {
+	 * @param ack Whether this packet is an acknowledgement
+	 */
+	public Packet(int source, int dest, Packet p, boolean ack) {
 		this.source = source;
 		this.dest = dest;
 		this.maxDelay = p.getMaxDelay();
@@ -60,10 +65,26 @@ public class Packet implements Serializable {
 		this.key = p.getKey();
 		this.vt = p.getValueTime();
 		this.model = p.getModel();
+		this.isAck = ack;
 		this.sentTime = new Date();
 		this.fromClient = false;
 	}
-	*/
+
+	/**
+	 * Generate packet containing search result
+	 * 
+	 * @param source Source index
+	 * @param dest Destination index
+	 * @param p Old packet
+	 * @param ack Whether this packet is an acknowledgement
+	 * @param hasKey Search result
+	 */
+	public Packet(int source, int dest, Packet p, boolean ack, boolean[] hasKey) {
+		this(source, dest, p, ack);
+		this.hasKey = hasKey;
+
+	}
+
 	/**
 	 * 
 	 */
@@ -92,6 +113,14 @@ public class Packet implements Serializable {
 		if (fromClient)
 			s += ", sent from client";
 		return s;
+	}
+
+	/**
+	 * 
+	 * @return search result
+	 */
+	public boolean[] getSearchResult() {
+		return hasKey;
 	}
 
 	/**
@@ -164,6 +193,30 @@ public class Packet implements Serializable {
 	 */
 	public Date getSentTime() {
 		return sentTime;
+	}
+
+	/**
+	 * 
+	 * @return reply channel
+	 */
+	public ObjectOutputStream getReturnChannel() {
+		return returnChannel;
+	}
+
+	/**
+	 * 
+	 * @return true if the packet is an acknowledgement
+	 */
+	public boolean isAck() {
+		return isAck;
+	}
+
+	/**
+	 * 
+	 * @param c The reply channel
+	 */
+	public void setReturnChannel(ObjectOutputStream c) {
+		returnChannel = c;
 	}
 
 	/**
